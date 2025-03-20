@@ -1,8 +1,13 @@
 <?php
-// the $_POST[] array will contain the passed in filename and data
-// the directory "data" is writable by the server (chmod 777)
 $filename = "data/".$_POST['filename'];
 $data = $_POST['filedata'];
-// write the file to disk
-file_put_contents($filename, $data);
+
+if (file_put_contents($filename, $data)) {
+    // Redirect to Qualtrics and send a link to the saved file
+    $qualtricsURL = "https://yourqualtricssurvey.qualtrics.com/jfe/form/SV_cwOMB3KwR2WUpKe?file_link=" . urlencode($filename);
+    header("Location: $qualtricsURL");
+    exit();
+} else {
+    echo "Error saving file.";
+}
 ?>
