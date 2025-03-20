@@ -304,7 +304,7 @@ var feedback = {
    on_finish: function(data) {
      var data = jsPsych.data.get().filter([{trial_type:'operation-span-recall'}, {trial_type:'html-button-operationspan'}]);
      if (file_name == null){
-       file_name = "WM_operation_span_"+partN+"_"+IDsub.toString()+".csv"}
+       file_name = "WM_operation_span_"+IDsub.toString()+".csv"} //+partN+"_"+IDsub.toString()+".csv"}
      else{
        file_name += ".csv"
      }
