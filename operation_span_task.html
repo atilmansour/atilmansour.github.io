@@ -287,14 +287,22 @@ var feedback = {
     //}
   //}
 
-  function saveData(filename, filedata){
-        $.ajax({
-              type:'post',
-              cache: false,
-              url: 'save_data.php', // this is the path to the above PHP script
-              data: {filename: filename, filedata: filedata}
-        });
-  };
+  function saveData(filename, filedata, redirectURL) {
+    $.ajax({
+        type: 'POST',
+        cache: false,
+        url: 'save_data.php', // Path to PHP script
+        data: { filename: filename, filedata: filedata },
+        success: function(response) {
+            console.log("Data saved successfully:", response);
+            window.location.href = redirectURL; // Redirect only after success
+        },
+        error: function(xhr, status, error) {
+            console.error("Error saving data:", error);
+            alert("There was an error saving your data. Please contact the researcher.");
+        }
+    });
+}
 
   var IDsub = Date.now()
   var dataLog = {
@@ -311,7 +319,9 @@ var feedback = {
      if (local){
        data.localSave('csv', file_name )
      } else {
-       saveData(file_name, data.csv());
+       //saveData(file_name, data.csv());
+       var qualtricsRedirect = "https://yourqualtricssurvey.qualtrics.com/jfe/form/SV_cwOMB3KwR2WUpKe?file_link=" + encodeURIComponent(file_name);  
+       saveData(file_name, data.csv(), qualtricsRedirect);
      }
   }
   }
