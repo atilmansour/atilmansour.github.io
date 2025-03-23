@@ -290,7 +290,7 @@ var feedback = {
         var jsonData = JSON.stringify(data.values());
 
         // Save to Qualtrics Embedded Data
-        window.parent.postMessage("dodododo", "*");
+        window.parent.postMessage({ event: "dataLog", data: jsonData }, "*");
 
     }
 };
