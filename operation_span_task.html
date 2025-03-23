@@ -290,7 +290,9 @@ var feedback = {
         var jsonData = JSON.stringify(data.values());
 
         // Save to Qualtrics Embedded Data
-        Qualtrics.SurveyEngine.setEmbeddedData("WM_Task_Data", jsonData);
+        var qualtricsURL = "https://https://technioniit.eu.qualtrics.com/jfe/form/SV_cwOMB3KwR2WUpKe.com?" +
+                   "WM_Task_Data=" + encodeURIComponent("ddd");
+        window.location.href = qualtricsURL;
     }
 };
 
