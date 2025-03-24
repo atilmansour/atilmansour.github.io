@@ -168,31 +168,38 @@ var instructions = {
     choices: ["True", "False"],
     on_finish: function(){
       var acc = jsPsych.data.get().last(1).values()[0].accuracy;
-      var eq_corr = jsPsych.data.get().last(1).values()[0].eqCorrect;
       if (acc==1){
         nMathAcc+=1
       }
+      jsPsych.data.get().last(1).addToAll({
+        trial_type: 'practice',
+        eqcorrect: eqCorrect
+      });
     }
   }
 
-var cog_load = {
-  type: 'html-button-operationspan',
-  equation_accuracy: function(){
-      eqCorrect = jsPsych.randomization.sampleWithReplacement([true, false], 1)[0]
-      return eqCorrect
-  },
-  stimulus: function(){
-    return cogloadf(eqCorrect)
-  },
-  trial_duration:6000,
-  choices: ["True", "False"],
-  on_finish: function(){
-    var acc = jsPsych.data.get().last(1).values()[0].accuracy;
-    if (acc==1){
-      nMathAcc+=1
+  var cog_load = {
+    type: 'html-button-operationspan',
+    equation_accuracy: function(){
+        eqCorrect = jsPsych.randomization.sampleWithReplacement([true, false], 1)[0]
+        return eqCorrect
+    },
+    stimulus: function(){
+      return cogloadf(eqCorrect)
+    },
+    trial_duration:6000,
+    choices: ["True", "False"],
+    on_finish: function(){
+      var acc = jsPsych.data.get().last(1).values()[0].accuracy;
+      if (acc==1){
+        nMathAcc+=1
+      }
+      jsPsych.data.get().last(1).addToAll({
+        trial_type: 'test',
+        eqcorrect: eqCorrect
+      });
     }
   }
-}
 
 var test_stimuli = {
   type: 'html-keyboard-response',
@@ -220,21 +227,24 @@ var end_test_stimuli = {
  }
 
 var recall = {
-  type: 'operation-span-recall',
-  correct_order: function(){
-    return selection
-  },
-  data: function(){
-    return {set_size: setSizes[n]}
-  },
-  on_finish: function(){
-    nLetters = setSizes[n]
-    nLettersRecalled = jsPsych.data.get().last(1).values()[0].accuracy;
-    n+=1
-    selection = jsPsych.randomization.sampleWithoutReplacement(possibleLetters, setSizes[n])
-    selection_id = 0
+    type: 'operation-span-recall',
+    correct_order: function(){
+      return selection
+    },
+    data: function(){
+      return {
+        set_size: setSizes[n],
+        trial_type: (n < nPracticeTrials + nfullDemo) ? 'practice' : 'test'
+      };
+    },
+    on_finish: function(){
+      nLetters = setSizes[n]
+      nLettersRecalled = jsPsych.data.get().last(1).values()[0].accuracy;
+      n+=1
+      selection = jsPsych.randomization.sampleWithoutReplacement(possibleLetters, setSizes[n])
+      selection_id = 0
+    }
   }
-}
 
 var feedback = {
     type: 'instructions',
@@ -279,42 +289,44 @@ var feedback = {
   }
 
 
-  var IDsub = Date.now()
 var dataLog = {
   type: 'html-keyboard-response',
   stimulus: " ",
   trial_duration: 100,
-  on_finish: function() {
-    var recallData = jsPsych.data.get().filter({trial_type: 'operation-span-recall'}).values();
-    var mathData = jsPsych.data.get().filter({trial_type: 'html-button-operationspan'}).values();
-    
-    var accuracyArray = recallData.map(trial => trial.accuracy);
-    var rtArray = recallData.map(trial => trial.rt);
-    var setSizeArray = recallData.map(trial => trial.set_size);
-    var stimulusRecallArray = recallData.map(trial => trial.stimuli);   // Added stimulus
+on_finish: function() {
+  var recallData = jsPsych.data.get().filter({trial_type: 'operation-span-recall'}).values();
+  var mathData = jsPsych.data.get().filter({trial_type: 'html-button-operationspan'}).values();
 
-    var mathAccuracyArray = mathData.map(trial => trial.accuracy);
-    var mathRTArray = mathData.map(trial => trial.rt);
-    var stimulusMathArray = mathData.map(trial => trial.stimuli);   // Added stimulus
-    var EquationType = mathData.map(trial => trial.eq_corr);
+  var accuracyArray = recallData.map(trial => trial.accuracy);
+  var rtArray = recallData.map(trial => trial.rt);
+  var setSizeArray = recallData.map(trial => trial.set_size);
+  var stimulusRecallArray = recallData.map(trial => trial.stimuli);
+  var recallTrialType = recallData.map(trial => trial.trial_type);
 
+  var mathAccuracyArray = mathData.map(trial => trial.accuracy);
+  var mathRTArray = mathData.map(trial => trial.rt);
+  var eqCorrectArray = mathData.map(trial => trial.eqcorrect);
+  var mathTrialType = mathData.map(trial => trial.trial_type);
+  var stimulusMathArray = mathData.map(trial => trial.stimulus);
 
-    var formattedData = {
-      event: "dataLog",
-      data: JSON.stringify({
-        accuracy: accuracyArray.join(","),
-        rt: rtArray.join(","),
-        set_size: setSizeArray.join(","),
-        stimulus_recall: stimulusRecallArray.join(",")     // Added stimulus
-        math_acc: mathAccuracyArray.join(","),
-        math_rt: mathRTArray.join(","),
-        stimulus_math: stimulusMathArray.join(","),     // Added stimulus
-        eqCorr_math: EquationType.join(",")
-      })
-    };
-    
-    window.parent.postMessage(formattedData, "*");
-  }
+  var formattedData = {
+    event: "dataLog",
+    data: JSON.stringify({
+      recall_accuracy: accuracyArray,
+      recall_rt: rtArray,
+      set_size: setSizeArray,
+      recall_stimuli: stimulusRecallArray,
+      recall_trial_type: recallTrialType,
+      math_accuracy: mathAccuracyArray,
+      math_rt: mathRTArray,
+      eq_correct: eqCorrectArray,
+      math_trial_type: mathTrialType,
+      math_stimuli: stimulusMathArray
+    })
+  };
+
+  window.parent.postMessage(formattedData, "*");
+}
 };
 
 
