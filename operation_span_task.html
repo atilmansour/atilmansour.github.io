@@ -172,7 +172,7 @@ var instructions = {
         nMathAcc+=1
       }
       jsPsych.data.get().last(1).addToAll({
-        trial_type: 'practice',
+        phase: 'practice',
         eqcorrect: eqCorrect
       });
     }
@@ -195,7 +195,7 @@ var instructions = {
         nMathAcc+=1
       }
       jsPsych.data.get().last(1).addToAll({
-        trial_type: 'test',
+        phase: 'test',
         eqcorrect: eqCorrect
       });
     }
@@ -234,7 +234,7 @@ var recall = {
     data: function(){
       return {
         set_size: setSizes[n],
-        trial_type: (n < nPracticeTrials + nfullDemo) ? 'practice' : 'test'
+        phase: (n < nPracticeTrials + nfullDemo) ? 'practice' : 'test'
       };
     },
     on_finish: function(){
@@ -301,12 +301,12 @@ on_finish: function() {
   var rtArray = recallData.map(trial => trial.rt);
   var setSizeArray = recallData.map(trial => trial.set_size);
   var stimulusRecallArray = recallData.map(trial => trial.stimuli);
-  var recallTrialType = recallData.map(trial => trial.trial_type);
+  var recallTrialType = recallData.map(trial => trial.phase);
 
   var mathAccuracyArray = mathData.map(trial => trial.accuracy);
   var mathRTArray = mathData.map(trial => trial.rt);
   var eqCorrectArray = mathData.map(trial => trial.eqcorrect);
-  var mathTrialType = mathData.map(trial => trial.trial_type);
+  var mathTrialType = mathData.map(trial => trial.phase);
   var stimulusMathArray = mathData.map(trial => trial.stimulus);
 
   var formattedData = {
