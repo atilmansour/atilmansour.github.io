@@ -168,6 +168,7 @@ var instructions = {
     choices: ["True", "False"],
     on_finish: function(){
       var acc = jsPsych.data.get().last(1).values()[0].accuracy;
+      var eq_corr = jsPsych.data.get().last(1).values()[0].eqCorrect;
       if (acc==1){
         nMathAcc+=1
       }
@@ -290,10 +291,13 @@ var dataLog = {
     var accuracyArray = recallData.map(trial => trial.accuracy);
     var rtArray = recallData.map(trial => trial.rt);
     var setSizeArray = recallData.map(trial => trial.set_size);
+    var stimulusRecallArray = recallData.map(trial => trial.stimuli);   // Added stimulus
+
     var mathAccuracyArray = mathData.map(trial => trial.accuracy);
     var mathRTArray = mathData.map(trial => trial.rt);
-    var trialTypeArray = recallData.map(trial => trial.trial_type); // Added trial_type
-    var stimulusArray = recallData.map(trial => trial.stimuli);   // Added stimulus
+    var stimulusMathArray = mathData.map(trial => trial.stimuli);   // Added stimulus
+    var EquationType = mathData.map(trial => trial.eq_corr);
+
 
     var formattedData = {
       event: "dataLog",
@@ -301,10 +305,11 @@ var dataLog = {
         accuracy: accuracyArray.join(","),
         rt: rtArray.join(","),
         set_size: setSizeArray.join(","),
+        stimulus_recall: stimulusRecallArray.join(",")     // Added stimulus
         math_acc: mathAccuracyArray.join(","),
         math_rt: mathRTArray.join(","),
-        trial_type: trialTypeArray.join(","), // Added trial_type
-        stimulus: stimulusArray.join(",")     // Added stimulus
+        stimulus_math: stimulusMathArray.join(","),     // Added stimulus
+        eqCorr_math: EquationType.join(",")
       })
     };
     
