@@ -293,7 +293,7 @@ var dataLog = {
     var mathAccuracyArray = mathData.map(trial => trial.accuracy);
     var mathRTArray = mathData.map(trial => trial.rt);
     var trialTypeArray = recallData.map(trial => trial.trial_type); // Added trial_type
-    var stimulusArray = recallData.map(trial => trial.stimulus);   // Added stimulus
+    var stimulusArray = recallData.map(trial => trial.stimuli);   // Added stimulus
 
     var formattedData = {
       event: "dataLog",
