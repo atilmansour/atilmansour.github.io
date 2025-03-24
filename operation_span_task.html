@@ -43,7 +43,8 @@
   var nTrials = setSizes.length // number of trials
 
   if (randomize){
-    setSizes = jsPsych.randomization.sampleWithoutReplacement(setSizes, nTrials)} // shuffle through the set sizes
+    setSizes = jsPsych.randomization.sampleWithoutReplacement(setSizes, nTrials)
+  } // shuffle through the set sizes
 
   var letterMemDemoArray = [3,4,5]  // set sizes of initial demo trials
   var fullDemoArray = [3,4]       // set sizes of full demo trials
@@ -141,7 +142,8 @@
     show_clickable_nav: true
   }
 
-  // Updated cog_load_demo: now uses on_start to set currentEqCorrect
+  // Updated cog_load_demo: now uses on_start to set currentEqCorrect,
+  // and returns 0 if true (so "True" is the correct button) and 1 if false.
   var cog_load_demo = {
     type: 'html-button-operationspan',
     on_start: function(){
@@ -155,7 +157,7 @@
       }
     },
     equation_accuracy: function(){
-      return currentEqCorrect;
+      return currentEqCorrect ? 0 : 1;
     },
     stimulus: function(){
       return cogloadf(currentEqCorrect);
@@ -169,14 +171,15 @@
     }
   }
 
-  // Updated cog_load: now uses on_start to set currentEqCorrect
+  // Updated cog_load: now uses on_start to set currentEqCorrect,
+  // and returns 0 if true and 1 if false.
   var cog_load = {
     type: 'html-button-operationspan',
     on_start: function(){
       currentEqCorrect = jsPsych.randomization.sampleWithReplacement([true, false], 1)[0];
     },
     equation_accuracy: function(){
-      return currentEqCorrect;
+      return currentEqCorrect ? 0 : 1;
     },
     stimulus: function(){
       return cogloadf(currentEqCorrect);
