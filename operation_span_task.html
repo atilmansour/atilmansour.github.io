@@ -61,9 +61,6 @@
   var nLetterRecalled = 0 // feedback
   var nMathAcc = 0 // feedback
 
-  // DECLARE eqCorrect GLOBALLY (minimal change)
-  var eqCorrect;
-
   // Global variable to hold the current truth value for the equation
   var currentEqCorrect;
 
@@ -144,46 +141,52 @@
     show_clickable_nav: true
   }
 
+  // Updated cog_load_demo: now uses on_start to set currentEqCorrect
   var cog_load_demo = {
     type: 'html-button-operationspan',
+    on_start: function(){
+      nCogLoadDemo +=1;
+      if (nCogLoadDemo==1){
+        currentEqCorrect = true;
+      } else if (nCogLoadDemo==2){
+        currentEqCorrect = false;
+      } else {
+        currentEqCorrect = jsPsych.randomization.sampleWithReplacement([true, false], 1)[0];
+      }
+    },
     equation_accuracy: function(){
-        nCogLoadDemo +=1
-        if (nCogLoadDemo==1){
-          eqCorrect = true
-        } else if (nCogLoadDemo==2){
-          eqCorrect = false
-        } else {
-          eqCorrect = jsPsych.randomization.sampleWithReplacement([true, false], 1)[0]
-        }
-        return eqCorrect
-      },
+      return currentEqCorrect;
+    },
     stimulus: function(){
-      return cogloadf(eqCorrect)
+      return cogloadf(currentEqCorrect);
     },
     choices: ["True", "False"],
     on_finish: function(){
       var acc = jsPsych.data.get().last(1).values()[0].accuracy;
       if (acc==1){
-        nMathAcc+=1
+        nMathAcc += 1;
       }
     }
   }
 
+  // Updated cog_load: now uses on_start to set currentEqCorrect
   var cog_load = {
     type: 'html-button-operationspan',
+    on_start: function(){
+      currentEqCorrect = jsPsych.randomization.sampleWithReplacement([true, false], 1)[0];
+    },
     equation_accuracy: function(){
-      eqCorrect = jsPsych.randomization.sampleWithReplacement([true, false], 1)[0]
-      return eqCorrect
-  },
+      return currentEqCorrect;
+    },
     stimulus: function(){
-      return cogloadf(eqCorrect)
+      return cogloadf(currentEqCorrect);
     },
     trial_duration:6000,
     choices: ["True", "False"],
     on_finish: function(){
       var acc = jsPsych.data.get().last(1).values()[0].accuracy;
       if (acc==1){
-        nMathAcc+=1
+        nMathAcc += 1;
       }
     }
   }
@@ -210,7 +213,7 @@
            jsPsych.endCurrentTimeline()
          }
        }
-  }
+   }
 
   var recall = {
     type: 'operation-span-recall',
@@ -220,4 +223,136 @@
     data: function(){
       return {set_size: setSizes[n]}
     },
-    on_finish_
+    on_finish: function(){
+      nLetters = setSizes[n]
+      nLettersRecalled = jsPsych.data.get().last(1).values()[0].accuracy;
+      n+=1
+      selection = jsPsych.randomization.sampleWithoutReplacement(possibleLetters, setSizes[n])
+      selection_id = 0
+    }
+  }
+
+  var feedback = {
+      type: 'instructions',
+      pages: function(){
+        pageOne = "<div style='font-size:20px;'><b>You recalled <font color='blue'>"+nLettersRecalled+" out of "+nLetters+"</font> letters in their correct order.</b><br><br>"
+        if (n>nPracticeTrials){
+          pageOne+= "You solved <font color='blue'>"+nMathAcc+" out of "+nLetters+"</font> math problems accurately.<br><br></div>"
+        }
+        return [pageOne]
+      },
+      allow_backward: false,
+      button_label_next: "Next Trial",
+      show_clickable_nav: true,
+      on_finish: function(){
+        nMathAcc = 0
+      }
+    }
+
+  var feedbackLoad = {
+      type: 'html-keyboard-response',
+      stimulus: function(){
+        var text = ""
+        var accuracy = jsPsych.data.get().last(1).values()[0].accuracy
+        if (accuracy==1){
+          text += '<div style="font-size:35px; color:rgb(0 220 0)"><b>Correct<br><br><br><br></div>'
+        } else{
+          text += '<div style="font-size:35px; color:rgb(240 0 0)"><b>Incorrect<br><br><br><br></div>'
+        }
+        return text
+      },
+      choices: jsPsych.NO_KEYS,
+      trial_duration: 1000
+    }
+
+  var conclusion = {
+    type: 'html-keyboard-response',
+    stimulus: function(){
+      return '<div style="font-size:20px;">This task is over.<br><br>Thank you for your participation in this task. <br><br>Please tell the Research Assistant that you have finished the task.</div>'
+  },
+    choices: jsPsych.NO_KEYS
+  }
+
+  var IDsub = Date.now()
+  var dataLog = {
+    type: 'html-keyboard-response',
+    stimulus: " ",
+    trial_duration: 100,
+    on_finish: function() {
+      var recallData = jsPsych.data.get().filter({trial_type: 'operation-span-recall'}).values();
+      var mathData = jsPsych.data.get().filter({trial_type: 'html-button-operationspan'}).values();
+      
+      var accuracyArray = recallData.map(trial => trial.accuracy);
+      var rtArray = recallData.map(trial => trial.rt);
+      var setSizeArray = recallData.map(trial => trial.set_size);
+      var stimulusRecallArray = recallData.map(trial => trial.stimuli);   // Added stimuli
+
+      var mathAccuracyArray = mathData.map(trial => trial.accuracy);
+      var mathRTArray = mathData.map(trial => trial.rt);
+      var stimulusMathArray = mathData.map(trial => trial.stimulus);   // Added stimulus
+
+      var formattedData = {
+        event: "dataLog",
+        data: JSON.stringify({
+          accuracy: accuracyArray.join(","),
+          rt: rtArray.join(","),
+          set_size: setSizeArray.join(","),
+          stimulus_recall: stimulusRecallArray.join(","),
+          math_acc: mathAccuracyArray.join(","),
+          math_rt: mathRTArray.join(","),
+          stimulus_math: stimulusMathArray.join(",")
+        })
+      };
+      
+      window.parent.postMessage(formattedData, "*");
+    }
+  };
+
+  var test_stack = {
+    timeline: [test_stimuli, cog_load, end_test_stimuli],
+    repetitions: 10
+  }
+
+  var test_procedure = {
+    timeline: [test_stack, recall, feedback],
+    repetitions: nTrials
+  }
+
+  var lettersDemoStack = {
+    timeline: [test_stimuli, end_test_stimuli],
+    repetitions: 10
+  }
+
+  var lettersDemo = {
+    timeline: [lettersDemoStack, recall, feedback],
+    repetitions: nPracticeTrials
+  }
+
+  var loadDemo = {
+    timeline: [cog_load_demo, feedbackLoad],
+    repetitions: 5
+  }
+
+  var fullDemo = {
+    timeline: [test_stack, recall, feedback],
+    repetitions: nfullDemo
+  }
+
+  timeline = []
+  timeline = timeline.concat([instructions, lettersDemo, instructions2, loadDemo, instructions3, fullDemo, instructions4, test_procedure])
+  timeline.push({
+    type: 'fullscreen',
+    fullscreen_mode: false
+  });
+  timeline.push(dataLog)
+  timeline.push(conclusion)
+
+  jsPsych.init({
+    timeline: timeline,
+    on_finish: function() {
+      jsPsych.data.displayData(); // comment out if you do not want to display results at the end of task
+      console.log(dataLog);
+    }
+  });
+  </script>
+</html>
