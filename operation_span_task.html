@@ -160,6 +160,7 @@ var cog_load_demo = {
   },
   choices: ["True", "False"],
   on_finish: function(){
+    data.equation_accuracy = eqCorrect;
     var acc = jsPsych.data.get().last(1).values()[0].accuracy;
     if (acc==1){
       nMathAcc+=1
@@ -179,6 +180,7 @@ stimulus: function(){
 trial_duration:6000,
 choices: ["True", "False"],
 on_finish: function(){
+  data.equation_accuracy = eqCorrect;
   var acc = jsPsych.data.get().last(1).values()[0].accuracy;
   if (acc==1){
     nMathAcc+=1
@@ -290,11 +292,10 @@ on_finish: function() {
   var mathRTArray = mathData.map(trial => trial.rt);
   var stimulusMathArray = mathData.map(trial => trial.stimulus.replace(/<br\s*\/?>/gi, "").replace(/\n/g, ""));   // Added stimulus
   var mathEquationAccArray = mathData.map(trial=>trial.equation_accuracy);
-  var mathresponseArray = mathData.map(trial=>trial.selection);
 
   var formattedData = {
     event: "dataLog",
-    data: JSON.stringify(`accuracy_recalled: ${accuracyArray.join(",")}; rt: ${rtArray.join(",")}; set_size: ${setSizeArray.join(",")}; stimulus_recall: ${stimulusRecallArray.join(",")}; response_recall: ${responseRecallArray.join(",")}; math_acc: ${mathAccuracyArray.join(",")}; math_rt: ${mathRTArray.join(",")}; math_choice: ${mathresponseArray}; stimulus_math: ${stimulusMathArray.join(",")}; num_practice_sets: ${nPracticeTrials}; math_eq_corrrectedness: ${mathEquationAccArray}; num_practice_math: 5; num_practice_full_sets: ${nfullDemo};  total_trials_p_t_sets: ${nTrials}; set_size_p_t: ${setSizes}`)
+    data: JSON.stringify(`accuracy_recalled: ${accuracyArray.join(",")}; rt: ${rtArray.join(",")}; set_size: ${setSizeArray.join(",")}; stimulus_recall: ${stimulusRecallArray.join(",")}; response_recall: ${responseRecallArray.join(",")}; math_acc: ${mathAccuracyArray.join(",")}; math_rt: ${mathRTArray.join(",")}; stimulus_math: ${stimulusMathArray.join(",")}; num_practice_sets: ${nPracticeTrials}; math_eq_corrrectedness: ${mathEquationAccArray}; num_practice_math: 5; num_practice_full_sets: ${nfullDemo};  total_trials_p_t_sets: ${nTrials}; set_size_p_t: ${setSizes}`)
   };
   
   window.parent.postMessage(formattedData, "*");
