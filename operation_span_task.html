@@ -159,7 +159,6 @@ var cog_load_demo = {
     return cogloadf(eqCorrect)
   },
   choices: ["True", "False"],
-  eqACC: eqCorrect,
   on_finish: function(){
     var acc = jsPsych.data.get().last(1).values()[0].accuracy;
     if (acc==1){
