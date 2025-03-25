@@ -290,10 +290,11 @@ on_finish: function() {
   var rtArray = recallData.map(trial => trial.rt);
   var setSizeArray = recallData.map(trial => trial.set_size);
   var stimulusRecallArray = recallData.map(trial => trial.stimuli);   // Added stimuli
+  var responseRecallArray = recallData.map(trial=> trial.recall);
 
   var mathAccuracyArray = mathData.map(trial => trial.accuracy);
   var mathRTArray = mathData.map(trial => trial.rt);
-  var stimulusMathArray = mathData.map(trial => trial.stimulus);   // Added stimulus
+  var stimulusMathArray = mathData.map(trial => trial.stimulus.replace(/<br>/g, ""));   // Added stimulus
 
 
   var formattedData = {
@@ -303,13 +304,15 @@ on_finish: function() {
       rt: ${rtArray.join(",")};
       set_size: ${setSizeArray.join(",")};
       stimulus_recall: ${stimulusRecallArray.join(",")}; 
+      response_recall: ${responseRecallArray.join(",")};
       math_acc: ${mathAccuracyArray.join(",")};
       math_rt: ${mathRTArray.join(",")};
       stimulus_math: ${stimulusMathArray.join(",")};
-      num_practice_letters: ${nPracticeTrials};
+      num_practice_sets: ${nPracticeTrials};
       num_practice_math: 5;
-      num_practice_full: ${nfullDemo}; 
-      total_trials_p_t: ${nTrials}; 
+      num_practice_full_sets: ${nfullDemo}; 
+      total_trials_p_t_sets: ${nTrials}; 
+      set_size_p_t: ${setSizes}
     `)
   };
   
@@ -353,10 +356,6 @@ var fullDemo = {
 timeline = []
 
 timeline = timeline.concat([instructions, lettersDemo, instructions2, loadDemo, instructions3, fullDemo, instructions4, test_procedure])
-timeline.push({
-type: 'fullscreen',
-fullscreen_mode: false
-});
 timeline.push(dataLog)
 timeline.push(conclusion)
 
