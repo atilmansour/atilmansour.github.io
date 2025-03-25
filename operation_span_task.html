@@ -159,8 +159,8 @@ var cog_load_demo = {
     return cogloadf(eqCorrect)
   },
   choices: ["True", "False"],
+  eqACC: eqCorrect,
   on_finish: function(){
-    data.equation_accuracy = eqCorrect;
     var acc = jsPsych.data.get().last(1).values()[0].accuracy;
     if (acc==1){
       nMathAcc+=1
@@ -179,8 +179,8 @@ stimulus: function(){
 },
 trial_duration:6000,
 choices: ["True", "False"],
+eqACC: eqCorrect,
 on_finish: function(){
-  data.equation_accuracy = eqCorrect;
   var acc = jsPsych.data.get().last(1).values()[0].accuracy;
   if (acc==1){
     nMathAcc+=1
@@ -291,7 +291,7 @@ on_finish: function() {
   var mathAccuracyArray = mathData.map(trial => trial.accuracy);
   var mathRTArray = mathData.map(trial => trial.rt);
   var stimulusMathArray = mathData.map(trial => trial.stimulus.replace(/<br\s*\/?>/gi, "").replace(/\n/g, ""));   // Added stimulus
-  var mathEquationAccArray = mathData.map(trial=>trial.equation_accuracy);
+  var mathEquationAccArray = mathData.map(trial=>trial.eqACC);
 
   var formattedData = {
     event: "dataLog",
